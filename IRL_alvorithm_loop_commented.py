@@ -188,6 +188,11 @@ class gridworld():
 
     def __init__(self, n, m, starting_point=(0, 0), final_point=(0, 4), mode = "continuous"):
         self.GWmode = mode
+        #For testing and development phases, the Gridworld object is initialised from the class itself.
+        #When implementing it inside the CNBI loop (mode = "TID") we initialise the Gridworld object, partly
+        #from the configuration file (.ini), partly from the inside, and allow the class to send and receive
+        #TID signals. The latter initialisation is done inside the initGW function.
+        #
         if mode != "TID":
             self.dim = (n, m)
             self.start_point = starting_point
@@ -205,9 +210,12 @@ class gridworld():
              self.errpDist_true, self.errpDist_false) = distribute_recorded_errp_distr()
             self.n_eeg_features = 2
             self.n_non_eeg_features = self.dim[0] + self.dim[1] + 5
-            self.n_features = self.n_eeg_features+self.n_non_eeg_features
+            self.n_features = self.n_eeg_features+self.n_non_eeg_features #  variable keeping track of the total
+            #                                                                dimensionality of the considered feature space in the IRL algorithm
     #        self.qtable[:,4] = -100; self.qtable[self.final_point, 4] = 0;
             self.atractor = False
+            #Put walls (very negative state-action values) around the gridworld 
+            #to avoid the agent from falling out of the domain.
             for x in range(self.limx[0], self.limx[1] + 1):
                 ipos = self.pos2qtableindex((x, self.limy[0]))
                 self.qtable[ipos, 3] = -100

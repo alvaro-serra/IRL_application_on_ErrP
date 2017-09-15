@@ -195,16 +195,16 @@ class gridworld():
         #
         if mode != "TID":
             self.dim = (n, m)
-            self.start_point = starting_point
-            self.final_point = final_point
-            self.limx = (-n / 2 + 1, n / 2)
-            self.limy = (0, m - 1)
-            self.position = list(starting_point)
-            self.lastaction = 0
-            self.obstacles = []
-            self.obstaclesCenters = []
-            self.qtable = np.zeros((n * m, 5))
-            self.isFinished = False
+            self.start_point = starting_point #starting state in gridworld
+            self.final_point = final_point #target state in gridworld
+            self.limx = (-n / 2 + 1, n / 2) #limits of the gridworld in the x axis
+            self.limy = (0, m - 1) #limits of the gridworld in the y axis
+            self.position = list(starting_point) #first position initialised at the starting position
+            self.lastaction = 0 #last action taken initialised by default to the action "0" (left)
+            self.obstacles = [] #obstacle list initialised to 0 by default
+            self.obstaclesCenters = [] #list of the centers of each obstacle initialised to 0
+            self.qtable = np.zeros((n * m, 5)) #initialisation of the qtable to 0 by default
+            self.isFinished = False #initialisation of the variable marking whether a trajectory has been finalised or is still ongoing.
             (self.errpDist_true_true, self.errpDist_true_false,
              self.errpDist_false_true, self.errpDist_false_false,
              self.errpDist_true, self.errpDist_false) = distribute_recorded_errp_distr()

@@ -21,8 +21,10 @@ import sys, time, math, string
 from cnbiloop import BCI
 from time import *
 # import EyeLink
-        
-# function to map actions (as they are defined in the IRL algorithm) to actions as they are defined in the speller
+
+"""        
+function to map actions (as they are defined in the IRL algorithm) to actions as they are defined in the speller
+"""
 def map_polAction2spelAction(action):
     if action == 0:
         return 3
@@ -37,18 +39,20 @@ def map_polAction2spelAction(action):
 
 def scalar_sigmoid(x):
     return 1./(1.+math.exp(-x))
-
-#load errp outputs from a recording of the speller.
+"""
+load errp outputs from a recording of the speller.
+"""
 def load_errp_recorded_distribution():
     fh = open('probabilities.txt', 'r')
     aux = fh.readlines()
     fh.close()
     return [ (float(elemental[0]), float(elemental[1])) for elemental in [ element[:-1].split('   ')[1:] for element in aux[:-2] ] ]
 
-
-#take the errp outputs of the recording and get 6 lists: Total Positive Actions (true),
-#, Total Negative Actions(false), Well Classified Positive Actions(true_true), Badly Classified Positive Actions (true_false)
-#, Well Classified Negative Actions (false_true), Badly Classified Negative Actions
+"""
+take the errp outputs of the recording and get 6 lists: Total Positive Actions (true),
+, Total Negative Actions(false), Well Classified Positive Actions(true_true), Badly Classified Positive Actions (true_false)
+, Well Classified Negative Actions (false_true), Badly Classified Negative Actions
+"""
 def distribute_recorded_errp_distr():
     errp_distribution = load_errp_recorded_distribution()
     true_true = [ element[1] for element in errp_distribution if element[0] == 1.0 and element[1] >= 0.5 ]
@@ -64,9 +68,16 @@ def distribute_recorded_errp_distr():
 def take_sample(lista):
     dice = int(random() * len(lista))
     return lista[dice]
-
-#Function to calculate representation of the Expert's trajectory in the feature space
-def expertCalcMod(Etraject, gamma, chosen_trajectory): #change if correct_track
+"""
+Function to calculate representation of the Expert's trajectory in the feature space
+the chosen trajectory is an obsolete variable used to chose among predefined trajectories
+present in the function "load_trajectory". We updated the way of getting our trajectories
+in a way that this function was not needed anymore. However the "chosen_trajectory" variable
+is deep enrooted in our code and it was easier to nullify its effects by designing a new
+value (chosen_trajectory = -1) for which the updated calculus of the Expert's trajectory in 
+the feature space would be always performed.
+"""
+def expertCalcMod(Etraject, gamma, chosen_trajectory): 
     if chosen_trajectory != -1:    
         mu = np.zeros(len(Etraject[0][0])+1)
         for traj in Etraject:
@@ -89,36 +100,57 @@ def expertCalcMod(Etraject, gamma, chosen_trajectory): #change if correct_track
         
     return mu
 
-
-def fperturbation0():
+"""
+No longer in use: Model #0 of the Error Potential: no error potential signal issued.
+"""
+def ferrp0():
     return 0
 
-
-def fperturbation1(position, sprim, final_point):
+"""
+No longer in use: Model #1 of the Error Potential:    binary error potential signal issued 
+                                    if the distance to the final target position increases or remains constant.
+"""
+def ferrp1(position, sprim, final_point):
     distact = abs(final_point[0] - position[0]) + abs(final_point[1] - position[1])
     distpos = abs(final_point[0] - sprim[0]) + abs(final_point[1] - sprim[1])
     return int(distpos >= distact)
 
-
-def fperturbation2():
+"""
+No longer in use: Model #2 of the Error Potential:    Hand-input binary error related potential signal.
+"""
+def ferrp2():
     pert = int(raw_input('perturbation?(answer with 0(no)/1(yes)): '))
     return pert
 
-
-def fperturbation3(position, sprim, final_point):
+"""
+No longer in use: Model #3 of the Error Potential:    same model as the model #1 with an uncertainty of properly detecting it of p = 0.8.
+"""
+def ferrp3(position, sprim, final_point):
     distact = abs(final_point[0] - position[0]) + abs(final_point[1] - position[1])
     distpos = abs(final_point[0] - sprim[0]) + abs(final_point[1] - sprim[1])
     return int(distpos >= distact and np.random.random() < 0.8)
 
 
-def fperturbation4(position, sprim, final_point, isFinished):
+"""
+No longer in use: Model #4 of the Error Potential:    same as model #1, including the issue of an errp signal if 
+                                    we finish the trajectory in a state other than the target.
+"""
+def ferrp4(position, sprim, final_point, isFinished):
     if isFinished == True:
         return position == final_point
     distact = abs(final_point[0] - position[0]) + abs(final_point[1] - position[1])
     distpos = abs(final_point[0] - sprim[0]) + abs(final_point[1] - sprim[1])
     return int(distpos >= distact)
+#############
+#IMPORTANT:     ferrp0, ferrp1, ferrp2, ferrp3 and ferrp4 are no longer in use in the recent versions of the code.
+#               They are still included as a guide to understand how we progressively modeled the errp considering
+#               the situations in which a human could consider an action taken as incorrect.
+#############
 
 
+"""
+No longer in use: Function used to get a representation and track the evolution of the state-action values in the Qtable.
+"""
 def debug(qtable, position, action, perturbation, isMovement):
     print position
     print qtable[0:5]
@@ -131,6 +163,9 @@ def debug(qtable, position, action, perturbation, isMovement):
     print perturbation
     raw_input('press ENTER')
 
+"""
+Map obstacle list (interpreted as in the speller/configuration file) to the obstacle list (interpreted as in the IRL algorithm)
+"""
 def string2obstacles(llista_obstacles, limx, limy):
     obstacles = []
     obstacles_centers = []
@@ -144,7 +179,11 @@ def string2obstacles(llista_obstacles, limx, limy):
     return obstacles, obstacles_centers
                 
         
-
+"""
+Gridworld Class containing the Gridworld engine and the algorithms related 
+to the implementation of the Inverse Reinforcement Learning and the adaptation to
+the CNBI loop.
+"""
 class gridworld():
 
     def __init__(self, n, m, starting_point=(0, 0), final_point=(0, 4), mode = "continuous"):

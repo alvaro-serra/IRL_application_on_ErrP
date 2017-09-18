@@ -214,7 +214,7 @@ class gridworld():
             #                                                                dimensionality of the considered feature space in the IRL algorithm
     #        self.qtable[:,4] = -100; self.qtable[self.final_point, 4] = 0;
             self.atractor = False
-            #Put walls (very negative state-action values) around the gridworld 
+            #Put walls (very negative state-action expected values) around the gridworld 
             #to avoid the agent from falling out of the domain.
             for x in range(self.limx[0], self.limx[1] + 1):
                 ipos = self.pos2qtableindex((x, self.limy[0]))
